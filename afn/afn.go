@@ -4,7 +4,17 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"sync"
 )
+
+//Rutinas ayuda a saber cuando no existen goroutines en ejecución.
+var Rutinas int
+
+//Validos indica el número de caminos válidos que tuvó la palabra en el AFN.
+var Validos int
+
+var mux = &sync.Mutex{}        //Para sincronizar la impresión
+var muxRutinas = &sync.Mutex{} //Para sincronizar el número de goroutines
 
 //Letra representa una letra del alfabeto.
 type Letra string
@@ -16,6 +26,13 @@ type AFN struct {
 	Σ       map[string]Letra   //Alfabeto del AFN
 	S       *Estado            //Estado inicial
 	F       []*Estado          //Conjunto de estados finales
+
+}
+
+func agregarRutina(n int) { //Se encarga de incrementar o decrementar el número de goroutines
+	muxRutinas.Lock() //Bloquea para manipular la variable Rutinas
+	Rutinas += n
+	defer muxRutinas.Unlock() //Desbloquea cuando termina de usar la variable
 }
 
 func (afn *AFN) init(n int) {
@@ -120,4 +137,11 @@ func NewANF(contenido string) (afn AFN) {
 	//lineas[4:] contiene todas las transiciones para el AFN
 	afn.asignarTransiciones(lineas[4:])
 	return
+}
+
+//Evaluar se encarga de verificar si la cadena pertenece al lenguaje.
+func (afn *AFN) Evaluar(cadena string) {
+	Validos = 0
+	agregarRutina(1)
+	afn.S.transicion(cadena, 0, afn.S.ID)
 }
