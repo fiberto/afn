@@ -21,6 +21,12 @@ func NewEstado(ID string) (e Estado) {
 }
 
 func (e *Estado) transicion(cadena string, pos int, recorrido string) { //Recibe la cadena, la posición y el reocorrido que ha tenido en el autómata
+	eps := e.δ["E"] //Se buscan las transiciones Epsilon
+	for _, edo := range eps {
+		nuevaCadena := cadena[:pos] + "E" + cadena[pos:]
+		go edo.transicion(nuevaCadena, pos+1, recorrido+"\t->\t"+edo.ID) //Se manda a una goroutine con la transición Epsilon
+		agregarRutina(1)
+	}
 	if len(cadena) == pos { //Para cuando ya se ha recorrido toda la cadena
 		if e.Final {
 			mux.Lock() //Bloqueo para imprimir

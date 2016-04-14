@@ -95,6 +95,10 @@ func (afn *AFN) asignarTransiciones(transiciones []string) {
 
 		//split[1] contiene la letra para la transicion
 		letra, val := afn.Σ[split[1]] //Se verifica que exista la letra en el alfabeto
+		if split[1] == "E" {
+			val = true
+			letra = "E"
+		}
 		if !val {
 			fmt.Println("No existe la letra en el alfabeto:", split[1])
 			os.Exit(1)
@@ -106,7 +110,6 @@ func (afn *AFN) asignarTransiciones(transiciones []string) {
 			fmt.Println("No existe el estado para la transición:", transicion)
 			os.Exit(1)
 		}
-
 		estado.δ[letra] = append(estado.δ[letra], sig) //Se asigna la transición en el mapa del estado
 	}
 }
